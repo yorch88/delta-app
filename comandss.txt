@@ -1,0 +1,4 @@
+docker logs -f flask-backend
+
+isolated backend:
+    docker-compose up backend db
