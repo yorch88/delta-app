@@ -74,7 +74,8 @@ exec-frontend:
 
 # Access the backend container CLI
 exec-backend:
-	docker exec -it $(BACKEND_SERVICE) /bin/sh
+	docker exec -it $(BACKEND_SERVICE) bash
+#docker exec -it $(BACKEND_SERVICE) /bin/sh
 
 # Access the db container CLI
 exec-db:
@@ -100,3 +101,74 @@ logs:
 clean:
 	$(DOCKER_COMPOSE) down -v --rmi all
 
+db-migrate-all:
+	docker exec -it $(BACKEND_SERVICE) bash -c "\
+	if [ ! -d 'migrations' ]; then flask db init; fi && \
+	flask db migrate -m \"$(msg)\" && \
+	flask db upgrade"
+
+db-migrate:
+	docker exec -it $(BACKEND_SERVICE) flask db migrate
+
+db-upgrade:
+	docker exec -it $(BACKEND_SERVICE) flask db upgrade
+
+db-stamp:
+	docker exec -it $(BACKEND_SERVICE) bash -c "\
+	if [ ! -d 'migrations' ]; then flask db init; fi && \
+	flask db migrate -m \"$(msg)\" && \
+	flask db stamp head"
+
+db-stampc:
+	docker exec -it $(BACKEND_SERVICE) flask db stamp head
+
+fix-migrations:
+	@echo "Clearing Alembic version table..."
+	docker exec -it $(DB_SERVICE) psql -U myuser -d delta-db -c "DELETE FROM alembic_version;"
+
+# Recreate migrations and apply them
+recreate-migrations:
+	@echo "Generating and applying new migrations..."
+	docker exec -it $(BACKEND_SERVICE) flask db migrate -m "Recreated migrations"
+	docker exec -it $(BACKEND_SERVICE) flask db upgrade
+
+# 1. Backup Database (customize this as necessary)
+db-backup:
+	@echo "Backing up database..."
+	docker exec -t $(DB_SERVICE) pg_dump -U myuser -F c delta-db > backup/delta-db-backup.sql
+
+# 2. Clear Alembic Version Table (to reset migration history)
+clear-alembic-version:
+	@echo "Clearing Alembic version table..."
+	docker exec -it $(DB_SERVICE) psql -U myuser -d delta-db -c "DELETE FROM alembic_version;"
+
+# 3. Generate New Migration
+generate-migration:
+	@echo "Generating new migration..."
+	docker exec -it $(BACKEND_SERVICE) flask db migrate -m "Recreated migrations"
+
+# 4. Apply Migrations
+apply-migration:
+	@echo "Applying migrations..."
+	docker exec -it $(BACKEND_SERVICE) flask db upgrade
+
+# 5. Run All Steps (run backup, clear alembic, generate migration, and apply migration in one go)
+migrate-db: db-backup clear-alembic-version generate-migration apply-migration
+	@echo "Database backup, migration creation, and upgrade complete!"
+
+run-update-db:
+	docker exec -it $(BACKEND_SERVICE) python migrations/script_update.py
+
+
+run-flask-upgrade:
+	docker exec -it $(BACKEND_SERVICE) flask db upgrade $(MIGRATION_ID)
+
+#example how run: make run-flask-upgrade MIGRATION_ID=b1ed94efa472
+run-flask-downgrade:
+	docker exec -it $(BACKEND_SERVICE) flask db downgrade $(MIGRATION_ID)
+
+#example: make run-update-column MIGRATION_MSG="Add column with nullable True"
+run-update-column:
+	docker exec -it $(BACKEND_SERVICE)  flask db migrate -m "$(MIGRATION_MSG)"
+	docker exec -it $(BACKEND_SERVICE)  flask db upgrade
+	docker exec -it $(BACKEND_SERVICE)  python migrations/script_update.py

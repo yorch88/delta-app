@@ -21,16 +21,13 @@ def create_servicerequest():
         data = request.json
         id_servicetype = data.get('id_servicetype', '')
         description = data.get('description', '').strip()
-        status = data.get('status', '').strip()
-        if not id_servicetype or not description:
-            return jsonify({"error": "Service Type and Description are required"}), 400
-
-        # Check for duplicates
-        # if ServiceRequest.query.filter_by(name=name).first():
-        #     return jsonify({"error": "Name already exists"}), 400
-
-        # Create the record
-        record = ServiceRequest(id_servicetype=id_servicetype, description=description, status=status)
+        phone_number = data.get('phone_number', '').strip()
+        email = data.get('email', '').strip()
+        nickname = data.get('nickname', '').strip()
+        if not id_servicetype or not description or not email or not nickname or not phone_number:
+            return jsonify({"error": "Nickname, Email, Phone numnber, Service Type and Description are required"}), 400
+        record = ServiceRequest(id_servicetype=id_servicetype, description=description, status="A",
+                                phone_number=phone_number, email=email, nickname=nickname)
         db.session.add(record)
         db.session.commit()
         return jsonify(record.to_dict()), 201

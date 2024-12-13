@@ -10,9 +10,14 @@ COPY . .
 RUN pip install --no-cache-dir -r requirements.txt
 RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
+# Ensure Python can locate the backend module
+ENV PYTHONPATH=/app
+
+# Change to backend directory for Flask commands
+WORKDIR /app/backend
+
 # Expose the Flask port
 EXPOSE 5000
-ENV PYTHONPATH=/app/backend
 
 # Command to start the app
 CMD ["flask", "run", "--host=0.0.0.0"]

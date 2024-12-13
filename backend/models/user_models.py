@@ -10,7 +10,6 @@ class Users(db.Model):
     email = db.Column(db.String(120), nullable=False, unique=True)
     password_user = db.Column(db.String(50), nullable=False)
     user_level = db.Column(db.String(50), nullable=True)
-
     def to_dict(self):
         """Convert the model instance to a dictionary."""
         return {

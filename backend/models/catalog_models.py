@@ -8,7 +8,6 @@ class ServiceType(db.Model):
     name = db.Column(db.String(80), nullable=False)
     description = db.Column(db.Text, nullable=False)
     status = db.Column(db.String(1), nullable=False)
-
     # Back-reference for all associated ServiceRequest instances
     service_requests = db.relationship('ServiceRequest', back_populates='service_type', lazy=True)
 
