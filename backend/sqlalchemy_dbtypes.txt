@@ -1,0 +1,105 @@
+Numeric Types
+db.Integer: A standard integer.
+
+age = db.Column(db.Integer)
+
+db.SmallInteger: A small integer (range -32,768 to 32,767).
+
+age = db.Column(db.SmallInteger)
+
+db.BigInteger: A large integer (range -2^63 to 2^63-1).
+
+large_number = db.Column(db.BigInteger)
+
+db.Float: A floating-point number.
+
+price = db.Column(db.Float)
+db.Numeric: A fixed-point decimal number. You can specify precision and scale.
+
+price = db.Column(db.Numeric(10, 2))  # precision 10, scale 2
+db.Decimal: Alias for db.Numeric.
+
+price = db.Column(db.Decimal(10, 2))
+String/Character Types
+db.String: A variable-length string with a specified maximum length.
+
+name = db.Column(db.String(80))
+db.Text: A text column for long strings (no length limit).
+
+description = db.Column(db.Text)
+Boolean Types
+db.Boolean: A boolean column (True or False).
+
+is_active = db.Column(db.Boolean)
+Date and Time Types
+db.Date: A date column (year, month, day).
+
+birthdate = db.Column(db.Date)
+db.Time: A time column (hours, minutes, seconds).
+
+start_time = db.Column(db.Time)
+db.DateTime: A column for both date and time.
+
+created_at = db.Column(db.DateTime)
+db.Interval: A column for an interval of time (e.g., days, hours).
+
+duration = db.Column(db.Interval)
+Binary Types
+db.LargeBinary: A column for large binary data (e.g., images, files).
+
+file_data = db.Column(db.LargeBinary)
+db.Binary: A column for binary data with a specific length.
+
+file_hash = db.Column(db.Binary(16))  # Fixed-length binary
+UUID Type
+db.UUID: A universally unique identifier (UUID).
+
+user_id = db.Column(db.UUID, default=uuid.uuid4)
+JSON and JSONB Types
+db.JSON: A column to store JSON data (supported in some databases like PostgreSQL).
+
+preferences = db.Column(db.JSON)
+Special Types for Relationships
+db.ForeignKey: A foreign key reference to another table.
+
+user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+db.PrimaryKeyConstraint: Used to define a primary key constraint across multiple columns.
+
+__table_args__ = (db.PrimaryKeyConstraint('column1', 'column2'),)
+Other Types
+db.Enum: An enum type that restricts column values to a set of predefined options.
+
+status = db.Column(db.Enum('active', 'inactive', name='status_enum'))
+db.Enum with Python Enum: If using a Python Enum class, you can define it like this:
+
+from enum import Enum
+class Status(Enum):
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+
+status = db.Column(db.Enum(Status))
+Composite Types
+db.Tuple: A composite column type used in certain databases (not all databases support this).
+
+coordinates = db.Column(db.Tuple(db.Integer, db.Integer))
+Additional Column Options
+nullable: Determines whether the column can be NULL. The default is True.
+
+
+name = db.Column(db.String(80), nullable=False)
+unique: Ensures that all values in the column are unique.
+
+
+email = db.Column(db.String(120), unique=True)
+default: Sets a default value for the column.
+
+
+created_at = db.Column(db.DateTime, default=datetime.utcnow)
+index: Creates an index for the column.
+
+
+email = db.Column(db.String(120), index=True)
+onupdate: Specifies a default value to be used when the column is updated.
+
+
+last_modified = db.Column(db.DateTime, onupdate=datetime.utcnow)

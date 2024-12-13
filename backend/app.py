@@ -7,10 +7,12 @@ from backend.models import db
 from backend.models.client_models import *
 from backend.models.client_models import Clients
 from backend.models.user_models import Users
+from backend.models.catalog_models import ServiceType
 # from backend.models.task_models import Tasks
-# from backend.models.catalog_models import Catalogs
 from backend.endpoints.users_endpoints import users_bp
 from backend.endpoints.clients_endpoints import clients_bp
+from backend.endpoints.catalogs_endpoints import servicetype_bp
+from backend.endpoints.tasks_endpoints import servicerequest_bp
 
 app = Flask(__name__)
 
@@ -31,6 +33,8 @@ with app.app_context():
 # Register blueprints
 app.register_blueprint(users_bp, url_prefix='/users/')
 app.register_blueprint(clients_bp, url_prefix='/clients/')
+app.register_blueprint(servicetype_bp, url_prefix='/servicetype/')
+app.register_blueprint(servicerequest_bp, url_prefix='/servicerequest/')
 
 @app.route('/')
 def health_check():
